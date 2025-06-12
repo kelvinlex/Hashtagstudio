@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light" data-color-theme="grayscale">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HASHTAGSTUDIO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Tab styles */
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-button:not(.active) {
+            color: var(--text-secondary);
+        }
+        
+        /* Toast notification */
+        #toast {
+            transition: all 0.3s ease;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        /* Auth modal */
+        .auth-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-content {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .auth-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .auth-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .auth-form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .auth-form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .auth-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .auth-form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .auth-form-button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+        
+        .auth-form-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .auth-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .auth-switch-text {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .auth-switch-link {
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        /* Profile section */
+        .profile-section {
+            display: none;
+            padding: 1.5rem;
+        }
+        
+        .profile-section.active {
+            display: block;
+        }
+        
+        .profile-card {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-email {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .profile-details {
+            margin-top: 1.5rem;
+        }
+        
+        .profile-detail {
+            margin-bottom: 1rem;
+        }
+        
+        .profile-detail-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-detail-value {
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+        }
+        
+        .profile-password-toggle {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        
+        .profile-logout {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: #ef4444;
+            color: white;
+            font-weight: 500;
+            margin-top: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .profile-logout:hover {
+            background-color: #dc2626;
+        }
+        
+        /* Color themes */
+        :root {
+            /* Grayscale (default) */
+            --primary: #6b7280;
+            --primary-dark: #4b5563;
+            --primary-light: #9ca3af;
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        
+        .dark {
+            --primary: #9ca3af;
+            --primary-dark: #6b7280;
+            --primary-light: #d1d5db;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+        }
+        
+        [data-color-theme="indigo"] {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+        }
+        
+        [data-color-theme="blue"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+        }
+        
+        [data-color-theme="emerald"] {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+        }
+        
+        [data-color-theme="rose"] {
+            --primary: #f43f5e;
+            --primary-dark: #e11d48;
+            --primary-light: #fb7185;
+        }
+        
+        [data-color-theme="amber"] {
+            --primary: #f59e0b;
+            --primary-dark: #d97706;
+            --primary-light: #fbbf24;
+        }
+        
+        /* Apply theme colors */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .theme-btn {
+            background-color: var(--primary);
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .theme-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .card {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .tips-preview {
+            background-color: var(--bg-tertiary);
+            transition: background-color 0.3s ease;
+        }
+        
+        .theme-favorites {
+            display: none;
+        }
+        
+        .theme-favorites.active {
+            display: block;
+        }
+        
+        .theme-favorites-title {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .theme-favorites-title:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        /* Load more button */
+        .load-more-btn {
+            background-color: var(--primary);
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .load-more-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Generate new hashtags button */
+        .generate-new-btn {
+            background-color: var(--primary);
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .generate-new-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Settings modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-modal.active {
+            display: flex;
+        }
+        
+        .settings-content {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .settings-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-option-label {
+            color: var(--text-primary);
+        }
+        
+        .settings-option-control {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Auth Modal (shown when user is not logged in) -->
+    <div id="auth-modal" class="auth-modal">
+        <div class="auth-content">
+            <div class="auth-tabs">
+                <div id="login-tab" class="auth-tab active" data-i18n="login">Login</div>
+                <div id="register-tab" class="auth-tab" data-i18n="register">Cadastro</div>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <div class="auth-form-group">
+                    <label for="login-email" class="auth-form-label" data-i18n="email">E-mail</label>
+                    <input type="email" id="login-email" class="auth-form-input" required>
+                    <div id="login-email-error" class="auth-error"></div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="login-password" class="auth-form-label" data-i18n="password">Senha</label>
+                    <input type="password" id="login-password" class="auth-form-input" required>
+                    <div id="login-password-error" class="auth-error"></div>
+                </div>
+                
+                <div id="login-error" class="auth-error mb-2"></div>
+                
+                <button id="login-button" class="auth-form-button" data-i18n="login">Entrar</button>
+                
+                <div class="auth-switch-text">
+                    <span data-i18n="no_account">Não tem uma conta?</span>
+                    <span id="switch-to-register" class="auth-switch-link" data-i18n="register_here">Cadastre-se aqui</span>
+                </div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form" style="display: none;">
+                <div class="auth-form-group">
+                    <label for="register-name" class="auth-form-label" data-i18n="name">Nome</label>
+                    <input type="text" id="register-name" class="auth-form-input" required>
+                    <div id="register-name-error" class="auth-error"></div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="register-email" class="auth-form-label" data-i18n="email">E-mail</label>
+                    <input type="email" id="register-email" class="auth-form-input" required>
+                    <div id="register-email-error" class="auth-error"></div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="register-password" class="auth-form-label" data-i18n="password">Senha</label>
+                    <input type="password" id="register-password" class="auth-form-input" required>
+                    <div id="register-password-error" class="auth-error"></div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="register-confirm-password" class="auth-form-label" data-i18n="confirm_password">Confirmar Senha</label>
+                    <input type="password" id="register-confirm-password" class="auth-form-input" required>
+                    <div id="register-confirm-password-error" class="auth-error"></div>
+                </div>
+                
+                <div id="register-error" class="auth-error mb-2"></div>
+                
+                <button id="register-button" class="auth-form-button" data-i18n="register">Cadastrar</button>
+                
+                <div class="auth-switch-text">
+                    <span data-i18n="have_account">Já tem uma conta?</span>
+                    <span id="switch-to-login" class="auth-switch-link" data-i18n="login_here">Faça login aqui</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (shown when user is logged in) -->
+    <div id="app-container" class="container mx-auto px-4 py-8" style="display: none;">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center">
+                <i class="fas fa-hashtag text-2xl mr-2" style="color: var(--primary)"></i>
+                <h1 class="text-2xl font-bold">HASHTAGSTUDIO</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="profile-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-user" style="color: var(--text-secondary)"></i>
+                </button>
+                <button id="settings-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-cog" style="color: var(--text-secondary)"></i>
+                </button>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-moon hidden dark:block" style="color: var(--text-secondary)"></i>
+                    <i class="fas fa-sun block dark:hidden" style="color: var(--text-secondary)"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Tabs Navigation -->
+            <div class="flex border-b" style="border-color: var(--border-color)">
+                <button id="generate-tab" class="tab-button active py-2 px-4 font-medium" data-i18n="generate_tab">Gerar Hashtags</button>
+                <button id="favorites-tab" class="tab-button py-2 px-4 font-medium" data-i18n="favorites_tab">Meus Favoritos</button>
+                <button id="tips-tab" class="tab-button py-2 px-4 font-medium" data-i18n="tips_tab">Dicas</button>
+                <button id="profile-tab" class="tab-button py-2 px-4 font-medium" data-i18n="profile_tab">Perfil</button>
+            </div>
+
+            <!-- Generate Hashtags Tab -->
+            <div id="generate-content" class="tab-content py-4">
+                <h2 class="text-xl font-semibold mb-4" data-i18n="select_theme">Selecione um tema</h2>
+                
+                <!-- Theme Selection Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="motivacional">
+                        <i class="fas fa-fire text-2xl mb-2"></i>
+                        <span data-i18n="motivational">Motivacional</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="empreendedorismo">
+                        <i class="fas fa-briefcase text-2xl mb-2"></i>
+                        <span data-i18n="entrepreneurship">Empreendedorismo</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="fitness">
+                        <i class="fas fa-dumbbell text-2xl mb-2"></i>
+                        <span data-i18n="fitness">Fitness</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="frases">
+                        <i class="fas fa-quote-right text-2xl mb-2"></i>
+                        <span data-i18n="impact_phrases">Frases de Impacto</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="lifestyle">
+                        <i class="fas fa-umbrella-beach text-2xl mb-2"></i>
+                        <span data-i18n="lifestyle">Lifestyle</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="moda">
+                        <i class="fas fa-tshirt text-2xl mb-2"></i>
+                        <span data-i18n="fashion">Moda</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="viagens">
+                        <i class="fas fa-plane text-2xl mb-2"></i>
+                        <span data-i18n="travel">Viagens</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="gamer">
+                        <i class="fas fa-gamepad text-2xl mb-2"></i>
+                        <span data-i18n="gaming">Gamer</span>
+                    </button>
+                    <!-- New themes -->
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="comedia">
+                        <i class="fas fa-laugh-squint text-2xl mb-2"></i>
+                        <span data-i18n="comedy">Comédia</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="culinaria">
+                        <i class="fas fa-utensils text-2xl mb-2"></i>
+                        <span data-i18n="culinary">Culinária</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="tecnologia">
+                        <i class="fas fa-laptop-code text-2xl mb-2"></i>
+                        <span data-i18n="technology">Tecnologia</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="beleza">
+                        <i class="fas fa-spa text-2xl mb-2"></i>
+                        <span data-i18n="beauty">Beleza</span>
+                    </button>
+                    <button class="theme-btn text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col items-center" data-theme="pets">
+                        <i class="fas fa-paw text-2xl mb-2"></i>
+                        <span data-i18n="pets">Pets</span>
+                    </button>
+                </div>
+
+                <!-- Generated Hashtags Section -->
+                <div id="hashtags-section" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium" data-i18n="generated_hashtags">Hashtags geradas</h3>
+                        <div class="flex space-x-2">
+                            <button id="generate-new" class="px-4 py-2 rounded-md transition-colors flex items-center generate-new-btn">
+                                <i class="fas fa-sync-alt mr-2"></i> <span data-i18n="generate_new">Gerar Hashtags</span>
+                            </button>
+                            <button id="load-more" class="px-4 py-2 rounded-md transition-colors flex items-center load-more-btn">
+                                <i class="fas fa-plus mr-2"></i> <span data-i18n="load_more">Ver mais</span>
+                            </button>
+                            <button id="copy-all" class="px-4 py-2 rounded-md transition-colors flex items-center" style="background-color: var(--primary); color: white">
+                                <i class="fas fa-copy mr-2"></i> <span data-i18n="copy_all">Copiar todas</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="hashtags-container" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                        <!-- Hashtags will be inserted here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Tips Preview -->
+                <div id="tips-preview" class="hidden p-4 rounded-lg tips-preview">
+                    <h3 class="text-lg font-medium mb-2" data-i18n="quick_tips">Dicas rápidas</h3>
+                    <p id="quick-tip"></p>
+                    <button id="view-more-tips" class="mt-2 hover:underline" style="color: var(--primary)">
+                        <span data-i18n="view_more_tips">Ver mais dicas</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Favorites Tab -->
+            <div id="favorites-content" class="tab-content hidden py-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold" data-i18n="my_favorites">Meus Favoritos</h2>
+                    <button id="clear-favorites" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center">
+                        <i class="fas fa-trash mr-2"></i> <span data-i18n="clear_all">Limpar tudo</span>
+                    </button>
+                </div>
+                
+                <div id="favorites-container">
+                    <!-- Theme favorites sections will be inserted here by JavaScript -->
+                </div>
+                
+                <div id="no-favorites" class="text-center py-8">
+                    <i class="fas fa-heart text-4xl mb-4" style="color: var(--text-secondary)"></i>
+                    <p style="color: var(--text-secondary)" data-i18n="no_favorites">Nenhuma hashtag favoritada ainda.</p>
+                </div>
+            </div>
+
+            <!-- Tips Tab -->
+            <div id="tips-content" class="tab-content hidden py-4">
+                <h2 class="text-xl font-semibold mb-4" data-i18n="content_tips">Dicas de Conteúdo</h2>
+                <p class="mb-6" style="color: var(--text-secondary)" data-i18n="select_theme_tips">Selecione um tema para ver dicas específicas sobre conteúdo, horários de postagem e tendências.</p>
+                
+                <div id="tips-detail-container" class="hidden">
+                    <div class="card rounded-lg shadow-md p-6 mb-6">
+                        <h3 id="tips-theme-title" class="text-xl font-semibold mb-4" style="color: var(--primary)"></h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                    <span data-i18n="content_tips">Dicas de Conteúdo</span>
+                                </h4>
+                                <ul id="content-tips" class="list-disc pl-5 space-y-2">
+                                    <!-- Content tips will be inserted here by JavaScript -->
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fas fa-clock mr-2 text-blue-500"></i>
+                                    <span data-i18n="best_times">Melhores horários</span>
+                                </h4>
+                                <p id="best-times"></p>
+                                
+                                <h4 class="font-medium mb-2 mt-4 flex items-center">
+                                    <i class="fas fa-video mr-2 text-purple-500"></i>
+                                    <span data-i18n="video_formats">Formatos de vídeo</span>
+                                </h4>
+                                <p id="video-formats"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-medium mb-2 flex items-center">
+                                <i class="fas fa-chart-line mr-2 text-green-500"></i>
+                                <span data-i18n="current_trends">Tendências atuais</span>
+                            </h4>
+                            <p id="current-trends"></p>
+                            
+                            <h4 class="font-medium mb-2 mt-4 flex items-center">
+                                <i class="fas fa-magic mr-2 text-pink-500"></i>
+                                <span data-i18n="extra_strategies">Extras (estratégias complementares)</span>
+                            </h4>
+                            <p id="extra-strategies"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="no-theme-selected" class="text-center py-8">
+                    <i class="fas fa-info-circle text-4xl mb-4" style="color: var(--text-secondary)"></i>
+                    <p style="color: var(--text-secondary)" data-i18n="select_theme_tips_message">Selecione um tema para ver dicas específicas.</p>
+                </div>
+            </div>
+            
+            <!-- Profile Tab -->
+            <div id="profile-content" class="tab-content hidden py-4">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profile-avatar">
+                            <!-- Initial will be inserted here -->
+                        </div>
+                        <div>
+                            <h2 class="profile-name" id="profile-name"></h2>
+                            <p class="profile-email" id="profile-email"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="profile-detail">
+                            <div class="profile-detail-label" data-i18n="email">E-mail</div>
+                            <div class="profile-detail-value" id="profile-email-value"></div>
+                        </div>
+                        
+                        <div class="profile-detail">
+                            <div class="profile-detail-label" data-i18n="password">Senha</div>
+                            <div class="profile-detail-value">
+                                <span id="profile-password-value">••••••••</span>
+                                <span id="profile-password-toggle" class="profile-password-toggle" data-i18n="show_password">Mostrar</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-logout" id="profile-logout" data-i18n="logout">Sair</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-sm" style="color: var(--text-secondary)">
+            <p data-i18n="footer_text">HASHTAGSTUDIO © 2023 - Gerador inteligente de hashtags para Instagram</p>
+            <p class="mt-2">Contato: <a href="mailto:Contatohashtagstudio@gmail.com" class="hover:underline" style="color: var(--primary)">Contatohashtagstudio@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="settings-modal">
+        <div class="settings-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" data-i18n="settings_title">Configurações</h2>
+                <button id="close-settings" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title" data-i18n="language_settings">Idioma</h3>
+                <div class="space-y-2">
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="pt">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> Português
+                    </button>
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="en">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> English
+                    </button>
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="es">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> Español
+                    </button>
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="ja">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> 日本語 (Japonês)
+                    </button>
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="fr">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> Français
+                    </button>
+                    <button class="language-option w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-lang="de">
+                        <i class="fas fa-check mr-2 hidden language-check"></i> Deutsch
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title" data-i18n="color_theme">Tema de Cor</h3>
+                <div class="grid grid-cols-4 gap-3">
+                    <button class="color-theme-option w-full h-10 rounded-md bg-gray-500 hover:ring-2 ring-gray-300 flex items-center justify-center" data-theme="grayscale">
+                        <i class="fas fa-check text-white text-xs theme-check"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="grayscale">Escala de cinza</span>
+                    </button>
+                    <button class="color-theme-option w-full h-10 rounded-md bg-indigo-500 hover:ring-2 ring-indigo-300 flex items-center justify-center" data-theme="indigo">
+                        <i class="fas fa-check text-white text-xs theme-check hidden"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="indigo">Indigo</span>
+                    </button>
+                    <button class="color-theme-option w-full h-10 rounded-md bg-blue-500 hover:ring-2 ring-blue-300 flex items-center justify-center" data-theme="blue">
+                        <i class="fas fa-check text-white text-xs theme-check hidden"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="blue">Azul</span>
+                    </button>
+                    <button class="color-theme-option w-full h-10 rounded-md bg-emerald-500 hover:ring-2 ring-emerald-300 flex items-center justify-center" data-theme="emerald">
+                        <i class="fas fa-check text-white text-xs theme-check hidden"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="emerald">Esmeralda</span>
+                    </button>
+                    <button class="color-theme-option w-full h-10 rounded-md bg-rose-500 hover:ring-2 ring-rose-300 flex items-center justify-center" data-theme="rose">
+                        <i class="fas fa-check text-white text-xs theme-check hidden"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="rose">Rosa</span>
+                    </button>
+                    <button class="color-theme-option w-full h-10 rounded-md bg-amber-500 hover:ring-2 ring-amber-300 flex items-center justify-center" data-theme="amber">
+                        <i class="fas fa-check text-white text-xs theme-check hidden"></i>
+                        <span class="text-white text-xs ml-1" data-i18n="amber">Âmbar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title" data-i18n="appearance">Aparência</h3>
+                <div class="settings-option">
+                    <span class="settings-option-label" data-i18n="dark_mode">Modo Escuro</span>
+                    <div class="settings-option-control">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-md shadow-lg transform translate-y-10 opacity-0 flex items-center">
+        <i class="fas fa-check-circle mr-2 text-green-400"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // Database with all content
+        const contentDatabase = {
+            themes: {
+                motivacional: {
+                    name: {
+                        pt: "Motivacional",
+                        en: "Motivational",
+                        es: "Motivacional",
+                        ja: "モチベーション",
+                        fr: "Motivationnel",
+                        de: "Motivational"
+                    },
+                    basicHashtags: ["motivação", "sucesso", "inspiração", "foco", "metas"],
+                    specificHashtags: ["mindset", "crescimentopessoal", "vencedor", "disciplina", "motivaçãodiária", "autoajuda", "pensamentopositivo", "focado", "determinação", "mudançadevida"],
+                    tips: {
+                        content: {
+                            pt: [
+                                "Poste frases inspiradoras com imagens de alta qualidade",
+                                "Use fundos minimalistas para destacar o texto",
+                                "Inclua histórias pessoais de superação",
+                                "Crie carrosséis com passos para alcançar objetivos",
+                                "Vídeos curtos com mensagens impactantes funcionam bem",
+                                "Compartilhe depoimentos de pessoas que superaram desafios",
+                                "Use cores vibrantes para destacar palavras-chave",
+                                "Crie desafios de 7 dias para engajar seu público"
+                            ],
+                            en: [
+                                "Post inspiring quotes with high quality images",
+                                "Use minimalist backgrounds to highlight text",
+                                "Include personal stories of overcoming",
+                                "Create carousels with steps to achieve goals",
+                                "Short videos with impactful messages work well",
+                                "Share testimonials from people who overcame challenges",
+                                "Use vibrant colors to highlight keywords",
+                                "Create 7-day challenges to engage your audience"
+                            ],
+                            es: [
+                                "Publica frases inspiradoras con imágenes de alta calidad",
+                                "Usa fondos minimalistas para destacar el texto",
+                                "Incluye historias personales de superación",
+                                "Crea carruseles con pasos para alcanzar objetivos",
+                                "Videos cortos con mensajes impactantes funcionan bien",
+                                "Comparte testimonios de personas que superaron desafíos",
+                                "Usa colores vibrantes para destacar palabras clave",
+                                "Crea desafíos de 7 días para interactuar con tu audiencia"
+                            ],
+                            ja: [
+                                "高品質な画像と共にインスピレーションを与える名言を投稿する",
+                                "テキストを強調するためにミニマリストな背景を使用する",
+                                "克服した個人的なストーリーを含める",
+                                "目標達成のためのステップをカルーセルで作成する",
+                                "インパクトのある短い動画が効果的",
+                                "困難を乗り越えた人々の証言を共有する",
+                                "キーワードを強調するために鮮やかな色を使用する",
+                                "7日間のチャレンジを作成して視聴者を引き込む"
+                            ],
+                            fr: [
+                                "Publiez des citations inspirantes avec des images de haute qualité",
+                                "Utilisez des arrière-plans minimalistes pour mettre en valeur le texte",
+                                "Incluez des histoires personnelles de surmonter",
+                                "Créez des carrousels avec des étapes pour atteindre des objectifs",
+                                "Les vidéos courtes avec des messages percutants fonctionnent bien",
+                                "Partagez des témoignages de personnes qui ont surmonté des défis",
+                                "Utilisez des couleurs vives pour mettre en évidence les mots-clés",
+                                "Créez des défis de 7 jours pour engager votre public"
+                            ],
+                            de: [
+                                "Veröffentlichen Sie inspirierende Zitate mit hochwertigen Bildern",
+                                "Verwenden Sie minimalistische Hintergründe, um den Text hervorzuheben",
+                                "Fügen Sie persönliche Geschichten der Überwindung hinzu",
+                                "Erstellen Sie Karussells mit Schritten zur Zielerreichung",
+                                "Kurze Videos mit eindrucksvollen Botschaften funktionieren gut",
+                                "Teilen Sie Erfahrungsberichte von Menschen, die Herausforderungen gemeistert haben",
+                                "Verwenden Sie lebendige Farben, um Schlüsselwörter hervorzuheben",
+                                "Erstellen Sie 7-Tage-Herausforderungen, um Ihr Publikum zu engagieren"
+                            ]
+                        },
+                        bestTimes: {
+                            pt: "Manhãs (7h-9h) para começar o dia inspirado e noites (20h-22h) para reflexão.",
+                            en: "Mornings (7-9am) to start the day inspired and evenings (8-10pm) for reflection.",
+                            es: "Mañanas (7-9h) para empezar el día inspirado y noches (20-22h) para reflexión.",
+                            ja: "インスピレーションを得て1日を始める朝 (7-9時) と反省のための夜 (20-22時)",
+                            fr: "Les matins (7h-9h) pour commencer la journée inspiré et les soirs (20h-22h) pour la réflexion.",
+                            de: "Morgens (7-9 Uhr), um inspiriert in den Tag zu starten, und abends (20-22 Uhr) zum Nachdenken."
+                        },
+                        videoFormats: {
+                            pt: "Reels com frases aparecendo em animação ou carrosséis com até 10 frases temáticas.",
+                            en: "Reels with quotes appearing in animation or carousels with up to 10 thematic quotes.",
+                            es: "Reels con frases apareciendo en animación o carruseles con hasta 10 frases temáticas.",
+                            ja: "アニメーションで表示される引用を含むリールまたは最大10のテーマ別引用を含むカルーセル",
+                            fr: "Reels avec des citations apparaissant en animation ou carrousels avec jusqu'à 10 citations thématiques.",
+                            de: "Reels mit Zitaten, die in Animationen erscheinen, oder Karussells mit bis zu 10 thematischen Zitaten."
+                        },
+                        currentTrends: {
+                            pt: "Frases sobre autoconhecimento e crescimento pessoal estão em alta, especialmente com fundos minimalistas.",
+                            en: "Quotes about self-knowledge and personal growth are trending, especially with minimalist backgrounds.",
+                            es: "Frases sobre autoconocimiento y crecimiento personal están en tendencia, especialmente con fondos minimalistas.",
+                            ja: "自己認識と個人の成長に関する引用がトレンドで、特にミニマリストな背景と共に",
+                            fr: "Les citations sur la connaissance de soi et la croissance personnelle sont tendance, en particulier avec des arrière-plans minimalistes.",
+                            de: "Zitate über Selbsterkenntnis und persönliches Wachstum sind im Trend, besonders mit minimalistischen Hintergründen."
+                        },
+                        extraStrategies: {
+                            pt: "Use perguntas nos stories para engajar seguidores e criar conteúdo com base em suas dúvidas. Crie uma série semanal chamada 'Dica Motivacional' e marque seguidores que compartilharem suas conquistas.",
+                            en: "Use questions in stories to engage followers and create content based on their questions. Create a weekly series called 'Motivational Tip' and tag followers who share their achievements.",
+                            es: "Usa preguntas en los stories para interactuar con seguidores y crear contenido basado en sus dudas. Crea una serie semanal llamada 'Consejo Motivacional' y etiqueta a seguidores que compartan sus logros.",
+                            ja: "ストーリーで質問を使用してフォロワーを引き込み、彼らの質問に基づいてコンテンツを作成します。'モチベーションのヒント'と呼ばれる週刊シリーズを作成し、成果を共有するフォロワーをタグ付けします。",
+                            fr: "Utilisez des questions dans les stories pour engager les followers et créer du contenu basé sur leurs questions. Créez une série hebdomadaire appelée 'Conseil Motivationnel' et identifiez les followers qui partagent leurs réalisations.",
+                            de: "Verwenden Sie Fragen in Stories, um Follower zu engagieren und Inhalte basierend auf ihren Fragen zu erstellen. Erstellen Sie eine wöchentliche Serie namens 'Motivationstipp' und markieren Sie Follower, die ihre Erfolge teilen."
+                        }
+                    }
+                },
+                // ... (rest of the contentDatabase remains the same)
+            }
+        };
+
+        // Translation dictionary
+        const translations = {
+            pt: {
+                settings_title: "Configurações",
+                language_settings: "Idioma",
+                color_theme: "Tema de Cor",
+                appearance: "Aparência",
+                dark_mode: "Modo Escuro",
+                grayscale: "Escala de cinza",
+                indigo: "Indigo",
+                blue: "Azul",
+                emerald: "Esmeralda",
+                rose: "Rosa",
+                amber: "Âmbar",
+                generate_tab: "Gerar Hashtags",
+                favorites_tab: "Meus Favoritos",
+                tips_tab: "Dicas",
+                profile_tab: "Perfil",
+                select_theme: "Selecione um tema",
+                motivational: "Motivacional",
+                entrepreneurship: "Empreendedorismo",
+                fitness: "Fitness",
+                impact_phrases: "Frases de Impacto",
+                lifestyle: "Lifestyle",
+                fashion: "Moda",
+                travel: "Viagens",
+                gaming: "Gamer",
+                comedy: "Comédia",
+                culinary: "Culinária",
+                technology: "Tecnologia",
+                beauty: "Beleza",
+                pets: "Pets",
+                generated_hashtags: "Hashtags geradas",
+                copy_all: "Copiar todas",
+                load_more: "Ver mais",
+                generate_new: "Gerar Hashtags",
+                quick_tips: "Dicas rápidas",
+                view_more_tips: "Ver mais dicas",
+                my_favorites: "Meus Favoritos",
+                clear_all: "Limpar tudo",
+                no_favorites: "Nenhuma hashtag favoritada ainda.",
+                content_tips: "Dicas de Conteúdo",
+                select_theme_tips: "Selecione um tema para ver dicas específicas sobre conteúdo, horários de postagem e tendências.",
+                best_times: "Melhores horários",
+                video_formats: "Formatos de vídeo",
+                current_trends: "Tendências atuais",
+                extra_strategies: "Extras (estratégias complementares)",
+                select_theme_tips_message: "Selecione um tema para ver dicas específicas.",
+                footer_text: "HASHTAGSTUDIO © 2023 - Gerador inteligente de hashtags para Instagram",
+                copied_to_clipboard: "Copiado para a área de transferência!",
+                all_copied: "Todas as hashtags copiadas!",
+                hashtag_favorited: "Hashtag favoritada!",
+                hashtag_removed: "Hashtag removida dos favoritos.",
+                favorites_cleared: "Favoritos limpos com sucesso!",
+                confirm_clear: "Tem certeza que deseja limpar todos os favoritos?",
+                login: "Login",
+                register: "Cadastro",
+                email: "E-mail",
+                password: "Senha",
+                name: "Nome",
+                confirm_password: "Confirmar Senha",
+                no_account: "Não tem uma conta?",
+                register_here: "Cadastre-se aqui",
+                have_account: "Já tem uma conta?",
+                login_here: "Faça login aqui",
+                show_password: "Mostrar",
+                hide_password: "Ocultar",
+                logout: "Sair",
+                login_error: "E-mail ou senha inválidos",
+                register_error: "Erro ao cadastrar",
+                password_mismatch: "As senhas não coincidem",
+                password_too_short: "A senha deve ter pelo menos 6 caracteres",
+                field_required: "Este campo é obrigatório",
+                invalid_email: "E-mail inválido"
+            },
+            en: {
+                settings_title: "Settings",
+                language_settings: "Language",
+                color_theme: "Color Theme",
+                appearance: "Appearance",
+                dark_mode: "Dark Mode",
+                grayscale: "Grayscale",
+                indigo: "Indigo",
+                blue: "Blue",
+                emerald: "Emerald",
+                rose: "Rose",
+                amber: "Amber",
+                generate_tab: "Generate Hashtags",
+                favorites_tab: "My Favorites",
+                tips_tab: "Tips",
+                profile_tab: "Profile",
+                select_theme: "Select a theme",
+                motivational: "Motivational",
+                entrepreneurship: "Entrepreneurship",
+                fitness: "Fitness",
+                impact_phrases: "Impact Phrases",
+                lifestyle: "Lifestyle",
+                fashion: "Fashion",
+                travel: "Travel",
+                gaming: "Gaming",
+                comedy: "Comedy",
+                culinary: "Culinary",
+                technology: "Technology",
+                beauty: "Beauty",
+                pets: "Pets",
+                generated_hashtags: "Generated hashtags",
+                copy_all: "Copy all",
+                load_more: "Load more",
+                generate_new: "Generate Hashtags",
+                quick_tips: "Quick tips",
+                view_more_tips: "View more tips",
+                my_favorites: "My Favorites",
+                clear_all: "Clear all",
+                no_favorites: "No favorited hashtags yet.",
+                content_tips: "Content Tips",
+                select_theme_tips: "Select a theme to see specific content tips, posting times and trends.",
+                best_times: "Best times",
+                video_formats: "Video formats",
+                current_trends: "Current trends",
+                extra_strategies: "Extras (complementary strategies)",
+                select_theme_tips_message: "Select a theme to see specific tips.",
+                footer_text: "HASHTAGSTUDIO © 2023 - Smart Instagram hashtag generator",
+                copied_to_clipboard: "Copied to clipboard!",
+                all_copied: "All hashtags copied!",
+                hashtag_favorited: "Hashtag favorited!",
+                hashtag_removed: "Hashtag removed from favorites.",
+                favorites_cleared: "Favorites cleared successfully!",
+                confirm_clear: "Are you sure you want to clear all favorites?",
+                login: "Login",
+                register: "Register",
+                email: "Email",
+                password: "Password",
+                name: "Name",
+                confirm_password: "Confirm Password",
+                no_account: "Don't have an account?",
+                register_here: "Register here",
+                have_account: "Already have an account?",
+                login_here: "Login here",
+                show_password: "Show",
+                hide_password: "Hide",
+                logout: "Logout",
+                login_error: "Invalid email or password",
+                register_error: "Error registering",
+                password_mismatch: "Passwords don't match",
+                password_too_short: "Password must be at least 6 characters",
+                field_required: "This field is required",
+                invalid_email: "Invalid email"
+            },
+            es: {
+                settings_title: "Configuración",
+                language_settings: "Idioma",
+                color_theme: "Tema de Color",
+                appearance: "Apariencia",
+                dark_mode: "Modo Oscuro",
+                grayscale: "Escala de grises",
+                indigo: "Índigo",
+                blue: "Azul",
+                emerald: "Esmeralda",
+                rose: "Rosa",
+                amber: "Ámbar",
+                generate_tab: "Generar Hashtags",
+                favorites_tab: "Mis Favoritos",
+                tips_tab: "Consejos",
+                profile_tab: "Perfil",
+                select_theme: "Selecciona un tema",
+                motivational: "Motivacional",
+                entrepreneurship: "Emprendimiento",
+                fitness: "Fitness",
+                impact_phrases: "Frases de Impacto",
+                lifestyle: "Estilo de Vida",
+                fashion: "Moda",
+                travel: "Viajes",
+                gaming: "Gaming",
+                comedy: "Comedia",
+                culinary: "Culinaria",
+                technology: "Tecnología",
+                beauty: "Belleza",
+                pets: "Mascotas",
+                generated_hashtags: "Hashtags generadas",
+                copy_all: "Copiar todas",
+                load_more: "Ver más",
+                generate_new: "Generar Hashtags",
+                quick_tips: "Consejos rápidos",
+                view_more_tips: "Ver más consejos",
+                my_favorites: "Mis Favoritos",
+                clear_all: "Limpiar todo",
+                no_favorites: "No hay hashtags favoritos aún.",
+                content_tips: "Consejos de Contenido",
+                select_theme_tips: "Selecciona un tema para ver consejos específicos sobre contenido, horarios de publicación y tendencias.",
+                best_times: "Mejores horarios",
+                video_formats: "Formatos de video",
+                current_trends: "Tendencias actuales",
+                extra_strategies: "Extras (estrategias complementarias)",
+                select_theme_tips_message: "Selecciona un tema para ver consejos específicos.",
+                footer_text: "HASHTAGSTUDIO © 2023 - Generador inteligente de hashtags para Instagram",
+                copied_to_clipboard: "¡Copiado al portapapeles!",
+                all_copied: "¡Todas las hashtags copiadas!",
+                hashtag_favorited: "¡Hashtag favorita!",
+                hashtag_removed: "Hashtag eliminada de favoritos.",
+                favorites_cleared: "¡Favoritos limpiados con éxito!",
+                confirm_clear: "¿Estás seguro de que quieres limpiar todos los favoritos?",
+                login: "Iniciar sesión",
+                register: "Registro",
+                email: "Correo electrónico",
+                password: "Contraseña",
+                name: "Nombre",
+                confirm_password: "Confirmar Contraseña",
+                no_account: "¿No tienes una cuenta?",
+                register_here: "Regístrate aquí",
+                have_account: "¿Ya tienes una cuenta?",
+                login_here: "Inicia sesión aquí",
+                show_password: "Mostrar",
+                hide_password: "Ocultar",
+                logout: "Cerrar sesión",
+                login_error: "Correo electrónico o contraseña inválidos",
+                register_error: "Error al registrarse",
+                password_mismatch: "Las contraseñas no coinciden",
+                password_too_short: "La contraseña debe tener al menos 6 caracteres",
+                field_required: "Este campo es obligatorio",
+                invalid_email: "Correo electrónico inválido"
+            },
+            ja: {
+                settings_title: "設定",
+                language_settings: "言語",
+                color_theme: "カラーテーマ",
+                appearance: "外観",
+                dark_mode: "ダークモード",
+                grayscale: "グレースケール",
+                indigo: "インディゴ",
+                blue: "青",
+                emerald: "エメラルド",
+                rose: "ローズ",
+                amber: "アンバー",
+                generate_tab: "ハッシュタグ生成",
+                favorites_tab: "お気に入り",
+                tips_tab: "ヒント",
+                profile_tab: "プロフィール",
+                select_theme: "テーマを選択",
+                motivational: "モチベーション",
+                entrepreneurship: "起業家精神",
+                fitness: "フィットネス",
+                impact_phrases: "インパクトのあるフレーズ",
+                lifestyle: "ライフスタイル",
+                fashion: "ファッション",
+                travel: "旅行",
+                gaming: "ゲーミング",
+                comedy: "コメディ",
+                culinary: "料理",
+                technology: "テクノロジー",
+                beauty: "美容",
+                pets: "ペット",
+                generated_hashtags: "生成されたハッシュタグ",
+                copy_all: "すべてコピー",
+                load_more: "さらに読み込む",
+                generate_new: "ハッシュタグを生成",
+                quick_tips: "クイックヒント",
+                view_more_tips: "さらにヒントを見る",
+                my_favorites: "お気に入り",
+                clear_all: "すべてクリア",
+                no_favorites: "お気に入りのハッシュタグはまだありません。",
+                content_tips: "コンテンツのヒント",
+                select_theme_tips: "特定のコンテンツのヒント、投稿時間、トレンドを見るにはテーマを選択してください。",
+                best_times: "ベストな時間帯",
+                video_formats: "動画フォーマット",
+                current_trends: "現在のトレンド",
+                extra_strategies: "追加戦略",
+                select_theme_tips_message: "特定のヒントを見るにはテーマを選択してください。",
+                footer_text: "HASHTAGSTUDIO © 2023 - Instagram用スマートハッシュタグジェネレーター",
+                copied_to_clipboard: "クリップボードにコピーしました！",
+                all_copied: "すべてのハッシュタグをコピーしました！",
+                hashtag_favorited: "ハッシュタグをお気に入りに追加しました！",
+                hashtag_removed: "ハッシュタグをお気に入りから削除しました。",
+                favorites_cleared: "お気に入りをクリアしました！",
+                confirm_clear: "すべてのお気に入りをクリアしてもよろしいですか？",
+                login: "ログイン",
+                register: "登録",
+                email: "メールアドレス",
+                password: "パスワード",
+                name: "名前",
+                confirm_password: "パスワード確認",
+                no_account: "アカウントをお持ちでない場合",
+                register_here: "こちらから登録",
+                have_account: "すでにアカウントをお持ちの場合",
+                login_here: "こちらからログイン",
+                show_password: "表示",
+                hide_password: "非表示",
+                logout: "ログアウト",
+                login_error: "メールアドレスまたはパスワードが無効です",
+                register_error: "登録エラー",
+                password_mismatch: "パスワードが一致しません",
+                password_too_short: "パスワードは6文字以上必要です",
+                field_required: "このフィールドは必須です",
+                invalid_email: "無効なメールアドレス"
+            },
+            fr: {
+                settings_title: "Paramètres",
+                language_settings: "Langue",
+                color_theme: "Thème de couleur",
+                appearance: "Apparence",
+                dark_mode: "Mode sombre",
+                grayscale: "Niveaux de gris",
+                indigo: "Indigo",
+                blue: "Bleu",
+                emerald: "Émeraude",
+                rose: "Rose",
+                amber: "Ambre",
+                generate_tab: "Générer des hashtags",
+                favorites_tab: "Mes favoris",
+                tips_tab: "Conseils",
+                profile_tab: "Profil",
+                select_theme: "Sélectionnez un thème",
+                motivational: "Motivationnel",
+                entrepreneurship: "Entrepreneuriat",
+                fitness: "Fitness",
+                impact_phrases: "Phrases d'impact",
+                lifestyle: "Style de vie",
+                fashion: "Mode",
+                travel: "Voyage",
+                gaming: "Jeux",
+                comedy: "Comédie",
+                culinary: "Culinaire",
+                technology: "Technologie",
+                beauty: "Beauté",
+                pets: "Animaux",
+                generated_hashtags: "Hashtags générés",
+                copy_all: "Tout copier",
+                load_more: "Voir plus",
+                generate_new: "Générer des hashtags",
+                quick_tips: "Conseils rapides",
+                view_more_tips: "Voir plus de conseils",
+                my_favorites: "Mes favoris",
+                clear_all: "Tout effacer",
+                no_favorites: "Aucun hashtag favori pour le moment.",
+                content_tips: "Conseils de contenu",
+                select_theme_tips: "Sélectionnez un thème pour voir des conseils spécifiques sur le contenu, les heures de publication et les tendances.",
+                best_times: "Meilleurs moments",
+                video_formats: "Formats vidéo",
+                current_trends: "Tendances actuelles",
+                extra_strategies: "Extras (stratégies complémentaires)",
+                select_theme_tips_message: "Sélectionnez un thème pour voir des conseils spécifiques.",
+                footer_text: "HASHTAGSTUDIO © 2023 - Générateur intelligent de hashtags pour Instagram",
+                copied_to_clipboard: "Copié dans le presse-papiers !",
+                all_copied: "Tous les hashtags copiés !",
+                hashtag_favorited: "Hashtag ajouté aux favoris !",
+                hashtag_removed: "Hashtag retiré des favoris.",
+                favorites_cleared: "Favoris effacés avec succès !",
+                confirm_clear: "Êtes-vous sûr de vouloir effacer tous les favoris ?",
+                login: "Connexion",
+                register: "Inscription",
+                email: "E-mail",
+                password: "Mot de passe",
+                name: "Nom",
+                confirm_password: "Confirmer le mot de passe",
+                no_account: "Vous n'avez pas de compte ?",
+                register_here: "Inscrivez-vous ici",
+                have_account: "Vous avez déjà un compte ?",
+                login_here: "Connectez-vous ici",
+                show_password: "Afficher",
+                hide_password: "Masquer",
+                logout: "Déconnexion",
+                login_error: "E-mail ou mot de passe invalide",
+                register_error: "Erreur lors de l'inscription",
+                password_mismatch: "Les mots de passe ne correspondent pas",
+                password_too_short: "Le mot de passe doit contenir au moins 6 caractères",
+                field_required: "Ce champ est obligatoire",
+                invalid_email: "E-mail invalide"
+            },
+            de: {
+                settings_title: "Einstellungen",
+                language_settings: "Sprache",
+                color_theme: "Farbschema",
+                appearance: "Erscheinungsbild",
+                dark_mode: "Dunkler Modus",
+                grayscale: "Graustufen",
+                indigo: "Indigo",
+                blue: "Blau",
+                emerald: "Smaragd",
+                rose: "Rosa",
+                amber: "Bernstein",
+                generate_tab: "Hashtags generieren",
+                favorites_tab: "Meine Favoriten",
+                tips_tab: "Tipps",
+                profile_tab: "Profil",
+                select_theme: "Thema auswählen",
+                motivational: "Motivational",
+                entrepreneurship: "Unternehmertum",
+                fitness: "Fitness",
+                impact_phrases: "Wirkungsvolle Sätze",
+                lifestyle: "Lifestyle",
+                fashion: "Mode",
+                travel: "Reisen",
+                gaming: "Gaming",
+                comedy: "Komödie",
+                culinary: "Kulinarik",
+                technology: "Technologie",
+                beauty: "Schönheit",
+                pets: "Haustiere",
+                generated_hashtags: "Generierte Hashtags",
+                copy_all: "Alle kopieren",
+                load_more: "Mehr laden",
+                generate_new: "Hashtags generieren",
+                quick_tips: "Schnelle Tipps",
+                view_more_tips: "Mehr Tipps anzeigen",
+                my_favorites: "Meine Favoriten",
+                clear_all: "Alle löschen",
+                no_favorites: "Noch keine favorisierten Hashtags.",
+                content_tips: "Inhaltstipps",
+                select_theme_tips: "Wählen Sie ein Thema, um spezifische Inhalte, Veröffentlichungszeiten und Trends zu sehen.",
+                best_times: "Beste Zeiten",
+                video_formats: "Videoformate",
+                current_trends: "Aktuelle Trends",
+                extra_strategies: "Extras (ergänzende Strategien)",
+                select_theme_tips_message: "Wählen Sie ein Thema, um spezifische Tipps zu sehen.",
+                footer_text: "HASHTAGSTUDIO © 2023 - Intelligenter Instagram-Hashtag-Generator",
+                copied_to_clipboard: "In die Zwischenablage kopiert!",
+                all_copied: "Alle Hashtags kopiert!",
+                hashtag_favorited: "Hashtag favorisiert!",
+                hashtag_removed: "Hashtag aus Favoriten entfernt.",
+                favorites_cleared: "Favoriten erfolgreich gelöscht!",
+                confirm_clear: "Sind Sie sicher, dass Sie alle Favoriten löschen möchten?",
+                login: "Anmelden",
+                register: "Registrieren",
+                email: "E-Mail",
+                password: "Passwort",
+                name: "Name",
+                confirm_password: "Passwort bestätigen",
+                no_account: "Sie haben noch kein Konto?",
+                register_here: "Hier registrieren",
+                have_account: "Sie haben bereits ein Konto?",
+                login_here: "Hier anmelden",
+                show_password: "Anzeigen",
+                hide_password: "Verbergen",
+                logout: "Abmelden",
+                login_error: "Ungültige E-Mail oder Passwort",
+                register_error: "Fehler bei der Registrierung",
+                password_mismatch: "Passwörter stimmen nicht überein",
+                password_too_short: "Passwort muss mindestens 6 Zeichen lang sein",
+                field_required: "Dieses Feld ist erforderlich",
+                invalid_email: "Ungültige E-Mail"
+            }
+        };
+
+        // Current state
+        let currentState = {
+            currentTheme: null,
+            favorites: JSON.parse(localStorage.getItem("hashtagStudioFavorites")) || {},
+            language: localStorage.getItem("hashtagStudioLanguage") || "pt",
+            colorTheme: localStorage.getItem("hashtagStudioColorTheme") || "grayscale",
+            darkMode: localStorage.getItem("hashtagStudioDarkMode") === "true" || false,
+            displayedHashtags: 10, // Number of initially displayed hashtags
+            currentUser: JSON.parse(localStorage.getItem("hashtagStudioCurrentUser")) || null,
+            users: JSON.parse(localStorage.getItem("hashtagStudioUsers")) || []
+        };
+
+        // Initialize the app
+        function init() {
+            // Check if user is logged in
+            if (currentState.currentUser) {
+                showApp();
+            } else {
+                showAuth();
+            }
+            
+            // Initialize favorites as an object if it's not
+            if (Array.isArray(currentState.favorites)) {
+                // Migrate from old array format to new object format
+                const oldFavorites = currentState.favorites;
+                currentState.favorites = {};
+                for (const theme in contentDatabase.themes) {
+                    currentState.favorites[theme] = [];
+                }
+                oldFavorites.forEach(hashtag => {
+                    for (const theme in contentDatabase.themes) {
+                        if (contentDatabase.themes[theme].basicHashtags.includes(hashtag) || 
+                            contentDatabase.themes[theme].specificHashtags.includes(hashtag)) {
+                            currentState.favorites[theme].push(hashtag);
+                            break;
+                        }
+                    }
+                });
+                localStorage.setItem('hashtagStudioFavorites', JSON.stringify(currentState.favorites));
+            } else {
+                // Ensure all themes exist in favorites object
+                for (const theme in contentDatabase.themes) {
+                    if (!currentState.favorites[theme]) {
+                        currentState.favorites[theme] = [];
+                    }
+                }
+            }
+            
+            // Apply saved settings
+            applyLanguage(currentState.language);
+            applyColorTheme(currentState.colorTheme);
+            applyDarkMode(currentState.darkMode);
+            
+            setupEventListeners();
+            
+            // Load favorites if any
+            renderFavorites();
+            
+            // Initialize dark mode toggle
+            document.getElementById('dark-mode-toggle').checked = currentState.darkMode;
+        }
+
+        // Show authentication forms
+        function showAuth() {
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+        }
+
+        // Show main app
+        function showApp() {
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            
+            // Update profile info
+            if (currentState.currentUser) {
+                updateProfileInfo();
+            }
+        }
+
+        // Update profile information
+        function updateProfileInfo() {
+            const user = currentState.currentUser;
+            if (!user) return;
+            
+            document.getElementById('profile-name').textContent = user.name;
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('profile-email-value').textContent = user.email;
+            
+            // Set avatar initial
+            const avatar = document.getElementById('profile-avatar');
+            avatar.textContent = user.name.charAt(0).toUpperCase();
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Theme buttons
+            document.querySelectorAll('.theme-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    currentState.currentTheme = theme;
+                    generateHashtags(theme);
+                    showQuickTips(theme);
+                });
+            });
+            
+            // Copy all button
+            document.getElementById('copy-all').addEventListener('click', copyAllHashtags);
+            
+            // Load more button
+            document.getElementById('load-more').addEventListener('click', loadMoreHashtags);
+            
+            // Generate new hashtags button
+            document.getElementById('generate-new').addEventListener('click', function() {
+                if (currentState.currentTheme) {
+                    generateHashtags(currentState.currentTheme);
+                }
+            });
+            
+            // View more tips button
+            document.getElementById('view-more-tips').addEventListener('click', function() {
+                switchTab(document.getElementById('tips-tab'));
+                if (currentState.currentTheme) {
+                    showFullTips(currentState.currentTheme);
+                }
+            });
+            
+            // Tab switching
+            document.getElementById('generate-tab').addEventListener('click', function() {
+                switchTab(this);
+            });
+            
+            document.getElementById('favorites-tab').addEventListener('click', function() {
+                switchTab(this);
+            });
+            
+            document.getElementById('tips-tab').addEventListener('click', function() {
+                switchTab(this);
+                if (currentState.currentTheme) {
+                    showFullTips(currentState.currentTheme);
+                }
+            });
+            
+            document.getElementById('profile-tab').addEventListener('click', function() {
+                switchTab(this);
+            });
+            
+            // Profile toggle button
+            document.getElementById('profile-toggle').addEventListener('click', function() {
+                switchTab(document.getElementById('profile-tab'));
+            });
+            
+            // Password toggle
+            document.getElementById('profile-password-toggle').addEventListener('click', function() {
+                const passwordValue = document.getElementById('profile-password-value');
+                const toggleButton = document.getElementById('profile-password-toggle');
+                
+                if (passwordValue.textContent === '••••••••') {
+                    passwordValue.textContent = currentState.currentUser.password;
+                    toggleButton.textContent = translations[currentState.language].hide_password;
+                } else {
+                    passwordValue.textContent = '••••••••';
+                    toggleButton.textContent = translations[currentState.language].show_password;
+                }
+            });
+            
+            // Logout button
+            document.getElementById('profile-logout').addEventListener('click', logout);
+            
+            // Language selection
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    currentState.language = lang;
+                    localStorage.setItem('hashtagStudioLanguage', lang);
+                    applyLanguage(lang);
+                    
+                    // Update tips if a theme is selected
+                    if (currentState.currentTheme) {
+                        showQuickTips(currentState.currentTheme);
+                        if (document.getElementById('tips-tab').classList.contains('active')) {
+                            showFullTips(currentState.currentTheme);
+                        }
+                    }
+                });
+            });
+            
+            // Color theme selection
+            document.querySelectorAll('.color-theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    currentState.colorTheme = theme;
+                    localStorage.setItem('hashtagStudioColorTheme', theme);
+                    applyColorTheme(theme);
+                });
+            });
+            
+            // Clear favorites
+            document.getElementById('clear-favorites').addEventListener('click', clearFavorites);
+            
+            // Theme toggle
+            document.getElementById('theme-toggle').addEventListener('click', toggleDarkMode);
+            
+            // Dark mode toggle in settings
+            document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+                currentState.darkMode = this.checked;
+                applyDarkMode(currentState.darkMode);
+                localStorage.setItem('hashtagStudioDarkMode', currentState.darkMode);
+            });
+            
+            // Settings modal
+            document.getElementById('settings-toggle').addEventListener('click', function() {
+                document.getElementById('settings-modal').classList.add('active');
+            });
+            
+            document.getElementById('close-settings').addEventListener('click', function() {
+                document.getElementById('settings-modal').classList.remove('active');
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('settings-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+            
+            // Auth tabs switching
+            document.getElementById('login-tab').addEventListener('click', function() {
+                document.getElementById('login-tab').classList.add('active');
+                document.getElementById('register-tab').classList.remove('active');
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'none';
+            });
+            
+            document.getElementById('register-tab').addEventListener('click', function() {
+                document.getElementById('register-tab').classList.add('active');
+                document.getElementById('login-tab').classList.remove('active');
+                document.getElementById('register-form').style.display = 'block';
+                document.getElementById('login-form').style.display = 'none';
+            });
+            
+            // Switch to register form
+            document.getElementById('switch-to-register').addEventListener('click', function() {
+                document.getElementById('register-tab').click();
+            });
+            
+            // Switch to login form
+            document.getElementById('switch-to-login').addEventListener('click', function() {
+                document.getElementById('login-tab').click();
+            });
+            
+            // Login button
+            document.getElementById('login-button').addEventListener('click', login);
+            
+            // Register button
+            document.getElementById('register-button').addEventListener('click', register);
+            
+            // Allow pressing Enter in auth forms
+            document.getElementById('login-email').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+            
+            document.getElementById('login-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+            
+            document.getElementById('register-name').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') register();
+            });
+            
+            document.getElementById('register-email').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') register();
+            });
+            
+            document.getElementById('register-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') register();
+            });
+            
+            document.getElementById('register-confirm-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') register();
+            });
+        }
+
+        // Login function
+        function login() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            
+            // Clear previous errors
+            document.getElementById('login-email-error').textContent = '';
+            document.getElementById('login-password-error').textContent = '';
+            document.getElementById('login-error').textContent = '';
+            
+            // Validate inputs
+            if (!email) {
+                document.getElementById('login-email-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            if (!password) {
+                document.getElementById('login-password-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            // Check if user exists
+            const user = currentState.users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                // Successful login
+                currentState.currentUser = user;
+                localStorage.setItem('hashtagStudioCurrentUser', JSON.stringify(user));
+                showApp();
+            } else {
+                // Failed login
+                document.getElementById('login-error').textContent = translations[currentState.language].login_error;
+            }
+        }
+
+        // Register function
+        function register() {
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            const confirmPassword = document.getElementById('register-confirm-password').value.trim();
+            
+            // Clear previous errors
+            document.getElementById('register-name-error').textContent = '';
+            document.getElementById('register-email-error').textContent = '';
+            document.getElementById('register-password-error').textContent = '';
+            document.getElementById('register-confirm-password-error').textContent = '';
+            document.getElementById('register-error').textContent = '';
+            
+            // Validate inputs
+            if (!name) {
+                document.getElementById('register-name-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            if (!email) {
+                document.getElementById('register-email-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            // Simple email validation
+            if (!email.includes('@') || !email.includes('.')) {
+                document.getElementById('register-email-error').textContent = translations[currentState.language].invalid_email;
+                return;
+            }
+            
+            if (!password) {
+                document.getElementById('register-password-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('register-password-error').textContent = translations[currentState.language].password_too_short;
+                return;
+            }
+            
+            if (!confirmPassword) {
+                document.getElementById('register-confirm-password-error').textContent = translations[currentState.language].field_required;
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                document.getElementById('register-confirm-password-error').textContent = translations[currentState.language].password_mismatch;
+                return;
+            }
+            
+            // Check if email already exists
+            if (currentState.users.some(u => u.email === email)) {
+                document.getElementById('register-email-error').textContent = translations[currentState.language].invalid_email;
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                name,
+                email,
+                password
+            };
+            
+            // Add to users array
+            currentState.users.push(newUser);
+            localStorage.setItem('hashtagStudioUsers', JSON.stringify(currentState.users));
+            
+            // Set as current user
+            currentState.currentUser = newUser;
+            localStorage.setItem('hashtagStudioCurrentUser', JSON.stringify(newUser));
+            
+            // Show app
+            showApp();
+        }
+
+        // Logout function
+        function logout() {
+            currentState.currentUser = null;
+            localStorage.removeItem('hashtagStudioCurrentUser');
+            showAuth();
+            
+            // Clear auth forms
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('register-name').value = '';
+            document.getElementById('register-email').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('register-confirm-password').value = '';
+            
+            // Switch to login tab
+            document.getElementById('login-tab').click();
+        }
+
+        // ... (rest of the existing functions remain the same)
+        // Apply language to the UI
+        function applyLanguage(lang) {
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+            
+            // Update language checkmarks
+            document.querySelectorAll('.language-check').forEach(check => {
+                check.classList.add('hidden');
+            });
+            document.querySelector(`.language-option[data-lang="${lang}"] .language-check`).classList.remove('hidden');
+        }
+
+        // Apply color theme
+        function applyColorTheme(theme) {
+            // Update theme checkmarks
+            document.querySelectorAll('.theme-check').forEach(check => {
+                check.classList.add('hidden');
+            });
+            document.querySelector(`.color-theme-option[data-theme="${theme}"] .theme-check`).classList.remove('hidden');
+            
+            // Set the theme attribute on html element
+            document.documentElement.setAttribute('data-color-theme', theme);
+            
+            // Update theme buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.style.backgroundColor = `var(--primary)`;
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('hashtagStudioColorTheme', theme);
+        }
+
+        // Apply dark mode
+        function applyDarkMode(dark) {
+            const html = document.documentElement;
+            if (dark) {
+                html.setAttribute('data-theme', 'dark');
+                html.classList.add('dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                html.classList.remove('dark');
+            }
+            localStorage.setItem('hashtagStudioDarkMode', dark);
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            currentState.darkMode = !currentState.darkMode;
+            applyDarkMode(currentState.darkMode);
+            localStorage.setItem('hashtagStudioDarkMode', currentState.darkMode);
+            document.getElementById('dark-mode-toggle').checked = currentState.darkMode;
+        }
+
+        // Generate hashtags for a given theme
+        function generateHashtags(theme) {
+            const themeData = contentDatabase.themes[theme];
+            
+            // Combine basic and specific hashtags
+            const allHashtags = [
+                ...themeData.basicHashtags,
+                ...themeData.specificHashtags
+            ];
+            
+            // Shuffle and pick initial set
+            const shuffled = [...allHashtags].sort(() => 0.5 - Math.random());
+            currentState.selectedHashtags = shuffled;
+            
+            // Clear previous hashtags
+            const container = document.getElementById('hashtags-container');
+            container.innerHTML = '';
+            
+            // Render initial set of hashtags
+            renderHashtags(0, currentState.displayedHashtags);
+            
+            // Show the hashtags section
+            document.getElementById('hashtags-section').classList.remove('hidden');
+        }
+
+        // Render a subset of hashtags
+        function renderHashtags(start, count) {
+            const container = document.getElementById('hashtags-container');
+            const theme = currentState.currentTheme;
+            
+            for (let i = start; i < Math.min(start + count, currentState.selectedHashtags.length); i++) {
+                const hashtag = currentState.selectedHashtags[i];
+                const isFavorited = currentState.favorites[theme]?.includes(hashtag);
+                
+                const hashtagElement = document.createElement('div');
+                hashtagElement.className = 'p-3 rounded-lg shadow-sm flex justify-between items-center card';
+                hashtagElement.innerHTML = `
+                    <span class="font-medium" style="color: var(--primary)">#${hashtag}</span>
+                    <div class="flex space-x-2">
+                        <button class="copy-btn p-1 hover:text-[var(--primary)]" data-hashtag="${hashtag}" style="color: var(--text-secondary)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="favorite-btn p-1 ${isFavorited ? 'text-yellow-500' : 'hover:text-yellow-500'}" data-hashtag="${hashtag}" data-theme="${theme}" style="${!isFavorited ? 'color: var(--text-secondary)' : ''}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(hashtagElement);
+            }
+            
+            // Set up event listeners for the new buttons
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const hashtag = this.getAttribute('data-hashtag');
+                    copyToClipboard(`#${hashtag}`);
+                    showToast(translations[currentState.language].copied_to_clipboard);
+                });
+            });
+            
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const hashtag = this.getAttribute('data-hashtag');
+                    const theme = this.getAttribute('data-theme');
+                    toggleFavorite(hashtag, theme, this);
+                });
+            });
+            
+            // Show/hide load more button based on remaining hashtags
+            const loadMoreBtn = document.getElementById('load-more');
+            const renderedCount = container.children.length;
+            if (renderedCount < currentState.selectedHashtags.length) {
+                loadMoreBtn.classList.remove('hidden');
+            } else {
+                loadMoreBtn.classList.add('hidden');
+            }
+        }
+
+        // Load more hashtags
+        function loadMoreHashtags() {
+            const container = document.getElementById('hashtags-container');
+            const currentCount = container.children.length;
+            renderHashtags(currentCount, currentState.displayedHashtags);
+        }
+
+        // Show quick tips for a theme
+        function showQuickTips(theme) {
+            const themeData = contentDatabase.themes[theme];
+            const tips = themeData.tips.content[currentState.language];
+            
+            // Pick a random tip
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById('quick-tip').textContent = randomTip;
+            
+            // Show the tips preview
+            document.getElementById('tips-preview').classList.remove('hidden');
+        }
+
+        // Show full tips for a theme
+        function showFullTips(theme) {
+            const themeData = contentDatabase.themes[theme];
+            
+            // Hide "no theme selected" message
+            document.getElementById('no-theme-selected').classList.add('hidden');
+            
+            // Set theme title
+            document.getElementById('tips-theme-title').textContent = themeData.name[currentState.language];
+            
+            // Clear previous tips
+            const tipsList = document.getElementById('content-tips');
+            tipsList.innerHTML = '';
+            
+            // Add content tips
+            themeData.tips.content[currentState.language].forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                tipsList.appendChild(li);
+            });
+            
+            // Add other tips
+            document.getElementById('best-times').textContent = themeData.tips.bestTimes[currentState.language];
+            document.getElementById('video-formats').textContent = themeData.tips.videoFormats[currentState.language];
+            document.getElementById('current-trends').textContent = themeData.tips.currentTrends[currentState.language];
+            document.getElementById('extra-strategies').textContent = themeData.tips.extraStrategies[currentState.language];
+            
+            // Show the tips container
+            document.getElementById('tips-detail-container').classList.remove('hidden');
+        }
+
+        // Copy all hashtags to clipboard
+        function copyAllHashtags() {
+            const hashtags = Array.from(document.querySelectorAll('#hashtags-container [data-hashtag]'))
+                .map(el => `#${el.getAttribute('data-hashtag')}`)
+                .join(' ');
+                
+            copyToClipboard(hashtags);
+            showToast(translations[currentState.language].all_copied);
+        }
+
+        // Toggle a hashtag as favorite
+        function toggleFavorite(hashtag, theme, button) {
+            if (!currentState.favorites[theme]) {
+                currentState.favorites[theme] = [];
+            }
+            
+            const index = currentState.favorites[theme].indexOf(hashtag);
+            
+            if (index === -1) {
+                // Add to favorites
+                currentState.favorites[theme].push(hashtag);
+                button.innerHTML = '<i class="fas fa-star text-yellow-500"></i>';
+                showToast(translations[currentState.language].hashtag_favorited);
+            } else {
+                // Remove from favorites
+                currentState.favorites[theme].splice(index, 1);
+                button.innerHTML = '<i class="fas fa-star text-gray-500 hover:text-yellow-500"></i>';
+                showToast(translations[currentState.language].hashtag_removed);
+            }
+            
+            // Update localStorage
+            localStorage.setItem('hashtagStudioFavorites', JSON.stringify(currentState.favorites));
+            
+            // Update favorites display if on that tab
+            if (document.getElementById('favorites-tab').classList.contains('active')) {
+                renderFavorites();
+            }
+        }
+
+        // Render favorites list
+        function renderFavorites() {
+            const container = document.getElementById('favorites-container');
+            const noFavorites = document.getElementById('no-favorites');
+            
+            // Check if there are any favorites at all
+            let hasFavorites = false;
+            for (const theme in currentState.favorites) {
+                if (currentState.favorites[theme].length > 0) {
+                    hasFavorites = true;
+                    break;
+                }
+            }
+            
+            if (!hasFavorites) {
+                noFavorites.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+            
+            noFavorites.classList.add('hidden');
+            container.innerHTML = '';
+            
+            // Create a favorites section for each theme that has favorites
+            for (const theme in currentState.favorites) {
+                if (currentState.favorites[theme].length > 0) {
+                    const themeData = contentDatabase.themes[theme];
+                    const themeName = themeData.name[currentState.language];
+                    
+                    const themeSection = document.createElement('div');
+                    themeSection.className = 'mb-6';
+                    
+                    const themeTitle = document.createElement('div');
+                    themeTitle.className = 'flex items-center mb-2';
+                    themeTitle.innerHTML = `
+                        <h3 class="text-lg font-medium">${themeName}</h3>
+                        <button class="ml-2 p-1 text-sm theme-copy-btn" data-theme="${theme}" style="color: var(--primary)">
+                            <i class="fas fa-copy mr-1"></i>
+                            <span data-i18n="copy_all">Copiar todas</span>
+                        </button>
+                    `;
+                    
+                    const hashtagsContainer = document.createElement('div');
+                    hashtagsContainer.className = 'grid grid-cols-2 md:grid-cols-5 gap-3';
+                    
+                    currentState.favorites[theme].forEach(hashtag => {
+                        const hashtagElement = document.createElement('div');
+                        hashtagElement.className = 'p-3 rounded-lg shadow-sm flex justify-between items-center card';
+                        hashtagElement.innerHTML = `
+                            <span class="font-medium" style="color: var(--primary)">#${hashtag}</span>
+                            <div class="flex space-x-2">
+                                <button class="copy-btn p-1 hover:text-[var(--primary)]" data-hashtag="${hashtag}" style="color: var(--text-secondary)">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="favorite-btn p-1 text-yellow-500" data-hashtag="${hashtag}" data-theme="${theme}">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </div>
+                        `;
+                        hashtagsContainer.appendChild(hashtagElement);
+                    });
+                    
+                    themeSection.appendChild(themeTitle);
+                    themeSection.appendChild(hashtagsContainer);
+                    container.appendChild(themeSection);
+                }
+            }
+            
+            // Set up event listeners for the new buttons
+            document.querySelectorAll('#favorites-container .copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const hashtag = this.getAttribute('data-hashtag');
+                    copyToClipboard(`#${hashtag}`);
+                    showToast(translations[currentState.language].copied_to_clipboard);
+                });
+            });
+            
+            document.querySelectorAll('#favorites-container .favorite-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const hashtag = this.getAttribute('data-hashtag');
+                    const theme = this.getAttribute('data-theme');
+                    toggleFavorite(hashtag, theme, this);
+                });
+            });
+            
+            document.querySelectorAll('.theme-copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    const hashtags = currentState.favorites[theme].map(h => `#${h}`).join(' ');
+                    copyToClipboard(hashtags);
+                    showToast(translations[currentState.language].all_copied);
+                });
+            });
+        }
+
+        // Clear all favorites
+        function clearFavorites() {
+            if (confirm(translations[currentState.language].confirm_clear)) {
+                // Reset favorites to empty object with all themes
+                currentState.favorites = {};
+                for (const theme in contentDatabase.themes) {
+                    currentState.favorites[theme] = [];
+                }
+                localStorage.setItem('hashtagStudioFavorites', JSON.stringify(currentState.favorites));
+                renderFavorites();
+                showToast(translations[currentState.language].favorites_cleared);
+            }
+        }
+
+        // Switch between tabs
+        function switchTab(selectedTab) {
+            // Update tab buttons
+            document.getElementById('generate-tab').classList.remove('active');
+            document.getElementById('favorites-tab').classList.remove('active');
+            document.getElementById('tips-tab').classList.remove('active');
+            document.getElementById('profile-tab').classList.remove('active');
+            
+            selectedTab.classList.add('active');
+            
+            // Update tab contents
+            document.getElementById('generate-content').classList.add('hidden');
+            document.getElementById('favorites-content').classList.add('hidden');
+            document.getElementById('tips-content').classList.add('hidden');
+            document.getElementById('profile-content').classList.add('hidden');
+            
+            if (selectedTab === document.getElementById('generate-tab')) {
+                document.getElementById('generate-content').classList.remove('hidden');
+            } else if (selectedTab === document.getElementById('favorites-tab')) {
+                document.getElementById('favorites-content').classList.remove('hidden');
+                renderFavorites();
+            } else if (selectedTab === document.getElementById('tips-tab')) {
+                document.getElementById('tips-content').classList.remove('hidden');
+                
+                if (!currentState.currentTheme) {
+                    document.getElementById('tips-detail-container').classList.add('hidden');
+                    document.getElementById('no-theme-selected').classList.remove('hidden');
+                }
+            } else if (selectedTab === document.getElementById('profile-tab')) {
+                document.getElementById('profile-content').classList.remove('hidden');
+            }
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
